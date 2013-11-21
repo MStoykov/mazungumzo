@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/fzzy/sockjs-go/sockjs"
 )
@@ -16,14 +15,14 @@ func chatHandler(s sockjs.Session) {
 	users.Add(s)
 	defer users.Remove(s)
 
+	client := login(s)
+	defer delete(clients, client.Name)
 	for {
 		m := s.Receive()
 		if m == nil {
 			break
 		}
-		fullAddr := s.Info().RemoteAddr
-		addr := fullAddr[:strings.LastIndex(fullAddr, ":")]
-		m = []byte(fmt.Sprintf("%s: %s", addr, m))
+		m = []byte(fmt.Sprintf("%s: %s", client.Name, m))
 		users.Broadcast(m)
 	}
 }
