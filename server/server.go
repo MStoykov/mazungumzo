@@ -9,21 +9,24 @@ import (
 	"github.com/fzzy/sockjs-go/sockjs"
 )
 
-var users *sockjs.SessionPool = sockjs.NewSessionPool()
-
 func chatHandler(s sockjs.Session) {
-	users.Add(s)
-	defer users.Remove(s)
 
 	client := login(s)
-	defer delete(clients, client.Name)
+	if err := clients.Add(client); err != nil {
+		client.Send([]byte(err.Error()))
+		chatHandler(s)
+		return
+	}
+	defer clients.Remove(client)
+	client.Send([]byte(fmt.Sprintf("Welcome, %s.", client.Name)))
+
 	for {
 		m := s.Receive()
 		if m == nil {
 			break
 		}
 		m = []byte(fmt.Sprintf("%s: %s", client.Name, m))
-		users.Broadcast(m)
+		clients.Broadcast(m)
 	}
 }
 

@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/fzzy/sockjs-go/sockjs"
 )
 
@@ -12,7 +10,7 @@ type Client struct {
 	NativeLanguage string
 }
 
-var clients = make(map[string]*Client)
+var clients = NewClientPool()
 
 func (c *Client) Send(message []byte) {
 	c.session.Send(message)
@@ -20,20 +18,12 @@ func (c *Client) Send(message []byte) {
 
 func login(s sockjs.Session) *Client {
 	name := askForName(s)
-	if _, ok := clients[name]; ok {
-		s.Send([]byte("Try again..."))
-		return login(s)
-	}
-
 	nativeLanguage := askForNativeLanguage(s)
 	client := &Client{
 		session:        s,
 		Name:           name,
 		NativeLanguage: nativeLanguage,
 	}
-	clients[name] = client
-	client.Send([]byte(fmt.Sprintf("Welcome %s", name)))
-
 	return client
 }
 
