@@ -19,22 +19,18 @@ type Client struct {
 var clients = NewClientPool()
 
 func (c *Client) Send(sender *Client, message []byte) {
-	translatable := new(workq.Item)
-	*translatable = workq.Item{
-		Sender:  sender.Name,
-		Message: string(message),
-		Src:     sender.NativeLanguage,
-		Dest:    c.NativeLanguage,
-		Done:    make(chan bool),
+	translatable := &workq.Item{
+		Sender:     sender.Name,
+		Message:    string(message),
+		Src:        sender.NativeLanguage,
+		Dest:       c.NativeLanguage,
 	}
 
-	c.queue.Push(translatable)
-	go c.stream()
+	c.queue.In() <- translatable
 }
 
 func (c *Client) stream() {
-	for !c.queue.IsEmpty() {
-		message := c.queue.Pop()
+	for message := range c.queue.Out() {
 		c.session.Send([]byte(fmt.Sprintf("[%v]%s: %s",
 			time.Now().Format("15:04:05"),
 			message.Sender,
@@ -50,7 +46,9 @@ func login(s sockjs.Session) *Client {
 		session:        s,
 		Name:           name,
 		NativeLanguage: nativeLanguage,
+		queue:          workq.NewQueue(),
 	}
+	go client.stream()
 
 	return client
 }

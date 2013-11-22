@@ -1,27 +1,45 @@
 package workq
 
-// TODO: Add mutex here.
-type Queue []*Item
+import "github.com/MStoykov/workQ"
 
-func (q *Queue) Push(item *Item) {
-	*q = append(*q, item)
-	go item.Translate()
+type Queue struct {
+	queue workQ.WorkQ
+	in    chan *Item
+	out   chan *Item
 }
 
-func (q *Queue) Pop() *Item {
-	if !q.IsEmpty() {
-		item := (*q)[0]
-		<-item.Done
-		*q = (*q)[1:len((*q))]
-		return item
+func NewQueue() Queue {
+	queue := workQ.NewWorkQ()
+	in := make(chan *Item)
+	go func() {
+		wrappedIn := queue.In()
+		defer close(wrappedIn)
+		for item := range in {
+			wrappedIn <- item
+		}
+	}()
+	out := make(chan *Item)
+	go func() {
+		wrappedOut := queue.Out()
+		defer close(out)
+		for item := range wrappedOut {
+			basicItem, ok := item.(*Item)
+			if !ok {
+				panic("WAT!?!?!")
+			}
+			out <- basicItem
+		}
+	}()
+	return Queue{
+		queue: queue,
+		in:    in,
+		out:   out,
 	}
-	return nil
 }
 
-func (q *Queue) Len() int {
-	return len(*q)
+func (q *Queue) Out() <-chan *Item {
+	return q.out
 }
-
-func (q *Queue) IsEmpty() bool {
-	return q.Len() == 0
+func (q *Queue) In() chan<- *Item {
+	return q.in
 }

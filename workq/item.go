@@ -11,10 +11,9 @@ type Item struct {
 	Translated string
 	Src        string
 	Dest       string
-	Done       chan bool
 }
 
-func (i *Item) Translate() {
+func (i *Item) Work() {
 	var err error
 
 	if i.Src == i.Dest {
@@ -25,7 +24,4 @@ func (i *Item) Translate() {
 			i.Translated = fmt.Sprintf("(untranslated) %s", i.Message)
 		}
 	}
-
-	i.Done <- true
-	close(i.Done)
 }
