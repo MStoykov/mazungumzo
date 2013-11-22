@@ -8,24 +8,20 @@ import (
 type Item struct {
 	Sender     string
 	Message    string
-	Translated string
+	Translated *string
 	Src        string
 	Dest       string
-	Done       chan bool
 }
 
-func (i *Item) Translate() {
+func (i Item) Work() {
 	var err error
 
 	if i.Src == i.Dest {
-		i.Translated = i.Message
+		*i.Translated = i.Message
 	} else {
-		i.Translated, err = translator.Translate(i.Src, i.Dest, i.Message)
+		*i.Translated, err = translator.Translate(i.Src, i.Dest, i.Message)
 		if err != nil {
-			i.Translated = fmt.Sprintf("(untranslated) %s", i.Message)
+			*i.Translated = fmt.Sprintf("(untranslated) %s", i.Message)
 		}
 	}
-
-	i.Done <- true
-	close(i.Done)
 }
