@@ -2,7 +2,7 @@ package workq
 
 import (
 	"fmt"
-	"sj/translator"
+	"github.com/Vladimiroff/mazungumzo/translator"
 )
 
 type Item struct {
