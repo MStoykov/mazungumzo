@@ -13,12 +13,12 @@ func chatHandler(s sockjs.Session) {
 
 	client := login(s)
 	if err := clients.Add(client); err != nil {
-		client.Send([]byte(err.Error()))
+		client.Send(client, []byte(err.Error()))
 		chatHandler(s)
 		return
 	}
 	defer clients.Remove(client)
-	client.Send([]byte(fmt.Sprintf("Welcome, %s.", client.Name)))
+	client.Send(client, []byte(fmt.Sprintf("Welcome, %s.", client.Name)))
 
 	for {
 		m := s.Receive()
@@ -26,7 +26,7 @@ func chatHandler(s sockjs.Session) {
 			break
 		}
 		m = []byte(fmt.Sprintf("%s: %s", client.Name, m))
-		clients.Broadcast(m)
+		clients.Broadcast(client, m)
 	}
 }
 
