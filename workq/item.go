@@ -2,16 +2,19 @@ package workq
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Vladimiroff/mazungumzo/translator"
 )
 
 type Item struct {
+	Time       time.Time
 	Sender     string
 	Message    string
 	Translated string
 	Src        string
 	Dest       string
-	Done       chan bool
+	Done       chan bool // TODO: This could be empty
 }
 
 func (i *Item) Translate() {

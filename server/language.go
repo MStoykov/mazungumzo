@@ -27,8 +27,8 @@ func NewLanguage(name string) *Language {
 func (l *Language) Stream() {
 	for item := range l.queue.Pop() {
 		for _, client := range l.clients {
-			message := fmt.Sprintf("[%v]%s: %s",
-				time.Now().Format("15:04:05"), // TODO: Track time on send
+			message := fmt.Sprintf("[%v] %s: %s",
+				item.Time.Format("15:04:05"),
 				item.Sender,
 				item.Translated,
 			)
@@ -51,9 +51,10 @@ func (l *Language) RemoveClient(c *Client) {
 	delete(l.clients, c.Name)
 }
 
-func (l *Language) Send(sender *Client, message []byte) {
+func (l *Language) Send(sender *Client, timeSent time.Time, message []byte) {
 	translatable := new(workq.Item)
 	*translatable = workq.Item{
+		Time:    timeSent,
 		Sender:  sender.Name,
 		Message: string(message),
 		Src:     sender.Language,

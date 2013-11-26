@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 type LanguagePool struct {
@@ -45,7 +46,8 @@ func (lp *LanguagePool) Get(name string) *Language {
 }
 
 func (lp *LanguagePool) Broadcast(sender *Client, message []byte) {
+	now := time.Now()
 	for _, language := range lp.languages {
-		language.Send(sender, message)
+		language.Send(sender, now, message)
 	}
 }
