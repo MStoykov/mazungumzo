@@ -14,9 +14,13 @@ type Client struct {
 	queue          workq.Queue
 	Name           string
 	NativeLanguage string
+	Language       *Language
 }
 
-var clients = NewClientPool()
+var (
+	clients   = NewClientPool()
+	languages = NewLanguagePool()
+)
 
 func (c *Client) Send(sender *Client, message []byte) {
 	translatable := new(workq.Item)
@@ -51,6 +55,13 @@ func login(s sockjs.Session) *Client {
 		Name:           name,
 		NativeLanguage: nativeLanguage,
 	}
+
+	language, ok := languages.Get(nativeLanguage)
+	if !ok {
+		language = NewLanguage(nativeLanguage)
+		languages.Add(language)
+	}
+	client.Language = language
 
 	return client
 }
