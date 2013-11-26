@@ -1,42 +1,25 @@
 package server
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/fzzy/sockjs-go/sockjs"
 
 	"github.com/Vladimiroff/mazungumzo/workq"
 )
 
 type Client struct {
-	session        sockjs.Session
-	queue          workq.Queue
-	Name           string
-	NativeLanguage string
+	session  sockjs.Session
+	queue    workq.Queue
+	Name     string
+	Language string
 }
 
-var clients = NewClientPool()
+var (
+	clients   = NewClientPool()
+	languages = NewLanguagePool()
+)
 
-func (c *Client) Send(sender *Client, message []byte) {
-	translatable := &workq.Item{
-		Sender:     sender.Name,
-		Message:    string(message),
-		Src:        sender.NativeLanguage,
-		Dest:       c.NativeLanguage,
-	}
-
-	c.queue.In() <- translatable
-}
-
-func (c *Client) stream() {
-	for message := range c.queue.Out() {
-		c.session.Send([]byte(fmt.Sprintf("[%v]%s: %s",
-			time.Now().Format("15:04:05"),
-			message.Sender,
-			message.Translated,
-		)))
-	}
+func (c *Client) Send(message string) {
+	c.session.Send([]byte(message))
 }
 
 func login(s sockjs.Session) *Client {
@@ -45,10 +28,9 @@ func login(s sockjs.Session) *Client {
 	client := &Client{
 		session:        s,
 		Name:           name,
-		NativeLanguage: nativeLanguage,
+		Language: nativeLanguage,
 		queue:          workq.NewQueue(),
 	}
-	go client.stream()
 
 	return client
 }

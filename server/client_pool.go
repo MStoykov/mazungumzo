@@ -34,12 +34,3 @@ func (cp *ClientPool) Remove(c *Client) {
 
 	delete(cp.clients, c.Name)
 }
-
-func (cp *ClientPool) Broadcast(sender *Client, m []byte) {
-	cp.mutex.RLock()
-	defer cp.mutex.RUnlock()
-
-	for _, client := range cp.clients {
-		client.Send(sender, m)
-	}
-}

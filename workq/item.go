@@ -2,10 +2,13 @@ package workq
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Vladimiroff/mazungumzo/translator"
 )
 
 type Item struct {
+	Time       time.Time
 	Sender     string
 	Message    string
 	Translated string
