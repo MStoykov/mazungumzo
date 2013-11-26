@@ -14,7 +14,7 @@ type Item struct {
 	Translated string
 	Src        string
 	Dest       string
-	Done       chan bool // TODO: This could be empty
+	Done       chan struct{}
 }
 
 func (i *Item) Translate() {
@@ -29,6 +29,5 @@ func (i *Item) Translate() {
 		}
 	}
 
-	i.Done <- true
 	close(i.Done)
 }

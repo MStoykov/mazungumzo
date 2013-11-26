@@ -59,7 +59,7 @@ func (l *Language) Send(sender *Client, timeSent time.Time, message []byte) {
 		Message: string(message),
 		Src:     sender.Language,
 		Dest:    l.Name,
-		Done:    make(chan bool),
+		Done:    make(chan struct{}),
 	}
 
 	l.queue.Push(translatable)
