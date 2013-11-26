@@ -21,7 +21,7 @@ func (c *Client) Send(message string) {
 	c.session.Send([]byte(message))
 }
 
-func login(s sockjs.Session) *Client {
+func login(s sockjs.Session) (*Client, string) {
 	name := askForName(s)
 	nativeLanguage := askForNativeLanguage(s)
 	client := &Client{
@@ -29,10 +29,7 @@ func login(s sockjs.Session) *Client {
 		Name:    name,
 	}
 
-	language := languages.Get(nativeLanguage)
-	language.AddClient(client)
-
-	return client
+	return client, nativeLanguage
 }
 
 func askForName(s sockjs.Session) string {
