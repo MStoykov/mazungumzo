@@ -13,12 +13,11 @@ func chatHandler(s sockjs.Session) {
 
 	client := login(s)
 	if err := clients.Add(client); err != nil {
-		client.Send(client, []byte(err.Error()))
-		chatHandler(s)
+		client.Send(new(Client), []byte(err.Error()))
 		return
 	}
 	defer clients.Remove(client)
-	client.Send(client, []byte(fmt.Sprintf("Welcome, %s.", client.Name)))
+	client.Send(new(Client), []byte(fmt.Sprintf("Welcome, %s.", client.Name)))
 
 	for {
 		m := s.Receive()
