@@ -1,20 +1,15 @@
 package server
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/fzzy/sockjs-go/sockjs"
 
 	"github.com/Vladimiroff/mazungumzo/workq"
 )
 
 type Client struct {
-	session        sockjs.Session
-	queue          workq.Queue
-	Name           string
-	NativeLanguage string
-	Language       *Language
+	session sockjs.Session
+	queue   workq.Queue
+	Name    string
 }
 
 var (
@@ -22,46 +17,20 @@ var (
 	languages = NewLanguagePool()
 )
 
-func (c *Client) Send(sender *Client, message []byte) {
-	translatable := new(workq.Item)
-	*translatable = workq.Item{
-		Sender:  sender.Name,
-		Message: string(message),
-		Src:     sender.NativeLanguage,
-		Dest:    c.NativeLanguage,
-		Done:    make(chan bool),
-	}
-
-	c.queue.Push(translatable)
-	go c.stream()
-}
-
-func (c *Client) stream() {
-	for !c.queue.IsEmpty() {
-		message := c.queue.Pop()
-		c.session.Send([]byte(fmt.Sprintf("[%v]%s: %s",
-			time.Now().Format("15:04:05"),
-			message.Sender,
-			message.Translated,
-		)))
-	}
+func (c *Client) Send(message string) {
+	c.session.Send([]byte(message))
 }
 
 func login(s sockjs.Session) *Client {
 	name := askForName(s)
 	nativeLanguage := askForNativeLanguage(s)
 	client := &Client{
-		session:        s,
-		Name:           name,
-		NativeLanguage: nativeLanguage,
+		session: s,
+		Name:    name,
 	}
 
-	language, ok := languages.Get(nativeLanguage)
-	if !ok {
-		language = NewLanguage(nativeLanguage)
-		languages.Add(language)
-	}
-	client.Language = language
+	language := languages.Get(nativeLanguage)
+	language.AddClient(client)
 
 	return client
 }
