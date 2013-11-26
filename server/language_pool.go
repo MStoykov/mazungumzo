@@ -35,7 +35,17 @@ func (lp *LanguagePool) Remove(l *Language) {
 	delete(lp.languages, l.Name)
 }
 
-func (lp *LanguagePool) Get(name string) (*Language, bool) {
+func (lp *LanguagePool) Get(name string) *Language {
 	language, ok := lp.languages[name]
-	return language, ok
+	if !ok {
+		language = NewLanguage(name)
+		languages.Add(language)
+	}
+	return language
+}
+
+func (lp *LanguagePool) Broadcast(sender *Client, message []byte) {
+	for _, language := range lp.languages {
+		language.Send(sender, message)
+	}
 }
