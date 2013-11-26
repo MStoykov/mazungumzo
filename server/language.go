@@ -25,7 +25,7 @@ func NewLanguage(name string) *Language {
 }
 
 func (l *Language) Stream() {
-	for item := range l.queue.Stream() {
+	for item := range l.queue.Pop() {
 		for _, client := range l.clients {
 			message := fmt.Sprintf("[%v]%s: %s",
 				time.Now().Format("15:04:05"), // TODO: Track time on send
@@ -56,7 +56,6 @@ func (l *Language) Send(sender *Client, message []byte) {
 	*translatable = workq.Item{
 		Sender:  sender.Name,
 		Message: string(message),
-		Src:     sender.NativeLanguage,
 		Dest:    l.Name,
 		Done:    make(chan bool),
 	}
