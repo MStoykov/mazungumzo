@@ -24,7 +24,6 @@ func chatHandler(s sockjs.Session) {
 		if m == nil {
 			break
 		}
-		m = []byte(fmt.Sprintf("%s: %s", client.Name, m))
 		clients.Broadcast(client, m)
 	}
 }
