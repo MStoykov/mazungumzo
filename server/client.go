@@ -7,9 +7,10 @@ import (
 )
 
 type Client struct {
-	session sockjs.Session
-	queue   workq.Queue
-	Name    string
+	session  sockjs.Session
+	queue    workq.Queue
+	Name     string
+	Language string
 }
 
 var (
@@ -21,15 +22,16 @@ func (c *Client) Send(message string) {
 	c.session.Send([]byte(message))
 }
 
-func login(s sockjs.Session) (*Client, string) {
+func login(s sockjs.Session) *Client {
 	name := askForName(s)
 	nativeLanguage := askForNativeLanguage(s)
 	client := &Client{
-		session: s,
-		Name:    name,
+		session:  s,
+		Name:     name,
+		Language: nativeLanguage,
 	}
 
-	return client, nativeLanguage
+	return client
 }
 
 func askForName(s sockjs.Session) string {

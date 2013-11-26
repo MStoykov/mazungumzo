@@ -11,15 +11,15 @@ import (
 
 func chatHandler(s sockjs.Session) {
 
-	client, nativeLanguage := login(s)
+	client := login(s)
 	if err := clients.Add(client); err != nil {
 		client.Send("Username is taken.")
 		return
 	}
 	defer clients.Remove(client)
-	client.Send(fmt.Sprintf("Welcome, %s.", client.Name))
+	client.Send(fmt.Sprintf("Welcome, %s. Your language is %s.", client.Name, client.Language))
 
-	language := languages.Get(nativeLanguage)
+	language := languages.Get(client.Language)
 	language.AddClient(client)
 	defer language.RemoveClient(client)
 

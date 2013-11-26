@@ -56,6 +56,7 @@ func (l *Language) Send(sender *Client, message []byte) {
 	*translatable = workq.Item{
 		Sender:  sender.Name,
 		Message: string(message),
+		Src:     sender.Language,
 		Dest:    l.Name,
 		Done:    make(chan bool),
 	}
